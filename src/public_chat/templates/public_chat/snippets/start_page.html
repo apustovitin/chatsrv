@@ -1,0 +1,298 @@
+{% load static %}
+
+<style type="text/css">
+.chat-log {
+	height: 500px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 10px;
+	background-color: #fff;
+	font-size: 0.9em;
+	flex-direction: column-reverse;
+}
+.profile-image{
+	width: 33px;
+	height: 33px;
+	margin-top: 0px;
+	margin-bottom: auto;
+}
+.profile-image:hover{
+	cursor: pointer;
+}
+.username-span{
+	font-weight: 600;
+	margin-top: 0px;
+	margin-bottom: auto;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.username-span:hover{
+	cursor: pointer;
+}
+.msg-p{
+	font-weight: 450;
+	margin-top: 5px;
+	margin-bottom: auto;
+	margin-left: 5px;
+	margin-right: 5px;
+	white-space: normal;
+	-ms-word-break: break-all;
+	word-break: break-all;
+}
+.message-container{
+	margin-top: 10px;
+	justify-content: start;
+}
+.timestamp-span{
+	font-weight: 400;
+	font-size: 0.8em;
+	color: var(--secondary-text-color);
+}
+.timestamp-span:hover{
+	cursor: pointer;
+}
+#id_chatroom_loading_spinner{
+		position: absolute;
+}
+.connected-users{
+	color: red;
+}
+.connected-users-icon{
+	color: red;
+}
+.connected-users-icon:hover{
+	cursor: default;
+}
+.chat-log {
+  height: 500px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #fff;
+  font-size: 0.9em;
+  flex-direction: column-reverse;
+}
+.chat-message-input-container{
+  outline: none;
+  box-shadow: none;
+}
+.chat-message-input{
+  outline: none;
+  border: 1px solid #fff;
+  border-top: 2px solid var(--main-background-color);
+
+}
+.message-container{
+  margin-top: 10px;
+  justify-content: start;
+}
+.username-span{
+  font-weight: 600;
+  margin-top: 0px;
+  margin-bottom: auto;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.friend-message-span{
+  font-weight: 380;
+  margin-top: 0px;
+  margin-bottom: auto;
+  margin-left: 5px;
+  margin-right: 5px;
+  font-size: 0.6em;
+  color: var(--light-primary-text-color);
+}
+.timestamp-span{
+  font-weight: 400;
+  font-size: 0.8em;
+  color: var(--secondary-text-color);
+}
+.timestamp-span:hover{
+  cursor: pointer;
+}
+.msg-p{
+  font-weight: 450;
+  margin-top: 5px;
+  margin-bottom: auto;
+  margin-left: 5px;
+  margin-right: 5px;
+  white-space: normal;
+  -ms-word-break: break-all;
+  word-break: break-all;
+}
+.profile-image{
+  width: 33px;
+  height: 33px;
+  margin-top: 0px;
+  margin-bottom: auto;
+}
+.profile-image-small{
+  width: 25px;
+  height: 25px;
+  margin-top: 0px;
+  margin-bottom: auto;
+  margin-right: 5px;
+}
+.profile-image:hover{
+  cursor: pointer;
+}
+.profile-image-small:hover{
+  cursor: pointer;
+}
+.username-span:hover{
+  cursor: pointer;
+}
+.material-icons:hover{
+  cursor: pointer;
+}
+.card {
+  border-radius: 12px;
+}
+
+#id_chatroom_loading_spinner{
+  position: absolute;
+}
+.members-list-container{
+  max-height: 500px;
+  overflow-y: scroll;
+}
+.chats-list-container{
+  max-height: 500px;
+  overflow-y: scroll;
+}
+.fa:hover{
+  cursor: pointer;
+}
+.chat-span{
+	font-weight: 600;
+	margin-top: 0px;
+	margin-bottom: auto;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.chat-span:hover{
+	cursor: pointer;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+{% if debug %}
+PUBLIC CHAT
+{% endif %}
+<span class="{% if not debug %}d-none{% endif %} page-number" id="id_page_number">1</span>
+
+<div class="container">
+  <div class="row">
+
+    <div class="col-sm-3 m-0 p-2">
+      <div class="card">
+        <div class="d-flex flex-row align-items-center card-header">
+          <h3>Chats</h3>
+          <i class="d-flex m-auto align-items-center fa">&#xf021;</i>
+        </div>
+        <div class="card-body p-1">
+          <div class="d-flex flex-column chats-list-container">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="text/javascript">
+
+  const chatsRefreshBtn = document.querySelector('.fa');
+  var rest_path = window.location.protocol + '//' + window.location.host + "/rest/public_chat_room/";
+  console.log('rest_path', rest_path);
+  // Функция, которая возвращаем fetch
+  const useRequest = () => {
+    return fetch(rest_path)
+      .then((response) => {
+        console.log('response', response);
+        return response.json();
+      })
+      .then((json) => { return json; })
+      .catch(() => { console.log('error') });
+  }
+
+  chatsRefreshBtn.addEventListener('load', async () => {
+    console.log('start');
+
+    const requestResult = await useRequest();
+    console.log('requestResult', requestResult)
+    createChatsElements(requestResult)
+    console.log('end')
+  });
+
+  window.addEventListener('load', async () => {
+    console.log('start');
+
+    const requestResult = await useRequest();
+    console.log('requestResult', requestResult)
+    createChatsElements(requestResult)
+    console.log('end')
+  });
+
+  function createChatsElements(chatsInfo){
+    var chatsList = document.querySelector('.chats-list-container')
+    chatsList.innerHTML = ''
+    for (let chat of chatsInfo) {
+      console.log(chat)
+      var newChatContainerDiv = document.createElement("div")
+      newChatContainerDiv.classList.add("d-flex")
+      newChatContainerDiv.classList.add("flex-row")
+      newChatContainerDiv.classList.add("p-2")
+      newChatContainerDiv.classList.add("member-container")
+      newChatContainerDiv.classList.add("flex-grow-1")
+
+
+      var div1 = document.createElement("div")
+      div1.classList.add("d-flex")
+      div1.classList.add("flex-column")
+
+      var chatSpan = document.createElement("span")
+      chatSpan.addEventListener("click", function(e){
+        selectChat(chat['id'])
+      })
+      chatSpan.classList.add("chat-span")
+      chatSpan.innerHTML = chat['title']
+      div1.appendChild(chatSpan)
+
+      newChatContainerDiv.appendChild(div1)
+      chatsList.appendChild(newChatContainerDiv)
+    }
+  }
+
+  function selectChat(chatId) {
+    var url = "{% url 'chats' room_id=1 %}".replace("1", chatId)
+		var win = window.open(url, "_blank")
+		win.focus()
+  }
+
+</script>
+
+
+<!-- Client Error MODAL -->
+<button type="button" id="id_trigger_client_error_modal" class="d-none btn btn-primary" data-toggle="modal" data-target="#id_client_error_modal">
+</button>
+<div class="modal fade" id="id_client_error_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Socket Client Error</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="id_client_error_modal_body">Something went wrong.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="id_client_error_modal_close_btn">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Client Error MODAL -->

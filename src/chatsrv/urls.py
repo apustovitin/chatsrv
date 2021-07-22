@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from personal.views import home_screen_view
 from django.conf import settings
 from django.conf.urls.static import static
@@ -13,7 +13,7 @@ router = routers.DefaultRouter()
 router.register(r'public_chat_room', views.PublicChatRoomViewset)
 
 urlpatterns = [
-    path('', home_screen_view, name='home'),
+    path('', include('personal.urls')),
     path('rest/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('account/', include('account.urls', namespace='account')),

@@ -202,7 +202,7 @@ PUBLIC CHAT
       <div class="card" id="id_chatroom_card">
       	<div class="card-header">
       		<div class="d-flex flex-row justify-content-between">
-      			<h3 class="">Public Chat</h3>
+      			<h3 class="chat-name"></h3>
       			<div class="d-flex flex-row align-items-center">
       				<span class="material-icons m-auto pr-1 connected-users-icon">person_outline</span>
       				<span class="m-auto connected-users" id="id_connected_users"></span>
@@ -547,6 +547,7 @@ PUBLIC CHAT
   const chatsRefreshBtn = document.querySelector('.fa');
   var rest_path = window.location.protocol + '//' + window.location.host + "/rest/public_chat_room/";
   console.log('rest_path', rest_path);
+
   // Функция, которая возвращаем fetch
   const useRequest = () => {
     return fetch(rest_path)
@@ -558,16 +559,31 @@ PUBLIC CHAT
       .catch(() => { console.log('error') });
   }
 
+  function get_chat_name() {
+
+  }
+
+
   chatsRefreshBtn.addEventListener('click', async () => {
     console.log('start');
 
     const requestResult = await useRequest();
     console.log('requestResult', requestResult)
-    createChatsElements(requestResult)
+    console.log('room_id', room_id)
+    createChatsElements(requestResult, {{room_id}})
     console.log('end')
   });
 
-  function createChatsElements(chatsInfo){
+  window.addEventListener('load', async () => {
+    console.log('start');
+
+    const requestResult = await useRequest();
+    console.log('requestResult', requestResult)
+    createChatsElements(requestResult, {{room_id}})
+    console.log('end')
+  });
+
+  const createChatsElements = (chatsInfo, room_id) => {
     var chatsList = document.querySelector('.chats-list-container')
     chatsList.innerHTML = ''
     for (let chat of chatsInfo) {
@@ -586,7 +602,7 @@ PUBLIC CHAT
 
       var chatSpan = document.createElement("span")
       chatSpan.addEventListener("click", function(e){
-        selectChat(chat['id'])
+        selectChat(chat['id'], chat['title'])
       })
       chatSpan.classList.add("chat-span")
       chatSpan.innerHTML = chat['title']
@@ -594,11 +610,19 @@ PUBLIC CHAT
 
       newChatContainerDiv.appendChild(div1)
       chatsList.appendChild(newChatContainerDiv)
+      if (room_id === chat['id']) {
+        let chatName = document.querySelector('.chat-name')
+        chatName.innerHTML = chat['title']
+      }
     }
   }
 
-  function selectChat(chatId) {
-
+  function selectChat(chatId, chatTitle) {
+    var url = "{% url 'chats' room_id=1 %}".replace("1", chatId)
+		var win = window.open(url, "_blank")
+		win.focus()
+    let chatName = document.querySelector('.chat-name')
+    chatName.innerHTML = chatTitle
   }
 </script>
 
