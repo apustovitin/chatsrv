@@ -5,9 +5,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from account.views import register_view, login_view, logout_view, account_search_view
 from django.contrib.auth import views as auth_views
+from rest_framework import routers
+from public_chat import views
+
+
+router = routers.DefaultRouter()
+router.register(r'public_chat_room', views.PublicChatRoomViewset)
 
 urlpatterns = [
     path('', home_screen_view, name='home'),
+    path('rest/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('account/', include('account.urls', namespace='account')),
     path('admin/', admin.site.urls),
 
